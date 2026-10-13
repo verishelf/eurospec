@@ -1,4 +1,5 @@
 import type { JobRecord, InspectionRecord, ServiceRecord } from "@/lib/storage";
+import { formatMoney, priceFor } from "@/lib/pricing";
 
 function loadJsPDF(): Promise<typeof import("jspdf").jsPDF> {
   return import("jspdf").then((m) => m.jsPDF);
@@ -167,7 +168,7 @@ export async function downloadRecordPdf(record: JobRecord) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     ensureSpace(10);
-    doc.text("Services Performed", margin, y);
+    doc.text("Services & Pricing", margin, y);
     y += 6;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
@@ -175,28 +176,62 @@ export async function downloadRecordPdf(record: JobRecord) {
       doc.text("None selected.", margin, y);
       y += 5;
     } else {
-      for (const s of r.services) {
+      const items =
+        r.lineItems && r.lineItems.length
+          ? r.lineItems
+          : r.services.map((s) => ({ name: s, price: priceFor(s) }));
+      for (const item of items) {
         ensureSpace(5);
-        doc.text(`  [x]  ${s}`, margin, y);
+        const priceLabel = item.price > 0 ? formatMoney(item.price) : "Quote";
+        doc.text(`  [x]  ${item.name}`, margin, y);
+        doc.text(priceLabel, 180, y, { align: "right" });
         y += 4.5;
       }
     }
     y += 3;
 
+    const sub =
+      r.subtotal ?? (r.lineItems || []).reduce((a, i) => a + i.price, 0);
+    const laborTot = r.laborTotal ?? 0;
+    const partsAmt = r.partsAmount ?? 0;
+    const grand = r.total ?? sub + laborTot + partsAmt;
+
+    ensureSpace(28);
+    doc.setDrawColor(200, 200, 200);
+    doc.setFillColor(245, 247, 250);
+    doc.roundedRect(margin, y, 182, 26, 2, 2, "FD");
+    y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Services subtotal: ${formatMoney(sub)}`, margin + 3, y);
+    y += 5;
     if (r.laborHours) {
-      ensureSpace(6);
-      doc.setFont("helvetica", "bold");
-      doc.text(`Labor Hours: `, margin, y);
-      doc.setFont("helvetica", "normal");
-      doc.text(r.laborHours, margin + 28, y);
-      y += 6;
+      doc.text(
+        `Extra labor: ${r.laborHours}h${
+          r.laborRate ? ` × ${formatMoney(r.laborRate)}` : ""
+        } = ${formatMoney(laborTot)}`,
+        margin + 3,
+        y
+      );
+      y += 5;
     }
+    if (partsAmt > 0) {
+      doc.text(`Extra parts: ${formatMoney(partsAmt)}`, margin + 3, y);
+      y += 5;
+    }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text(`TOTAL: ${formatMoney(grand)}`, margin + 3, y);
+    y += 10;
+
     if (r.partsNotes) {
       ensureSpace(12);
       doc.setFont("helvetica", "bold");
-      doc.text("Parts", margin, y);
+      doc.setFontSize(10);
+      doc.text("Parts notes", margin, y);
       y += 5;
       doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
       const parts = doc.splitTextToSize(r.partsNotes, 182);
       for (const line of parts) {
         ensureSpace(5);
@@ -208,9 +243,11 @@ export async function downloadRecordPdf(record: JobRecord) {
     if (r.notes) {
       ensureSpace(12);
       doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
       doc.text("Notes", margin, y);
       y += 5;
       doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
       const notes = doc.splitTextToSize(r.notes, 182);
       for (const line of notes) {
         ensureSpace(5);
