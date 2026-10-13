@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getRecords, type Record } from "@/lib/storage";
+import { getRecords, type JobRecord } from "@/lib/storage";
 
 export default function DashboardOverview() {
-  const [records, setRecords] = useState<Record[]>([]);
+  const [records, setRecords] = useState<JobRecord[]>([]);
 
   useEffect(() => {
     setRecords(getRecords());

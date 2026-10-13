@@ -20,7 +20,7 @@ export type InspectionRecord = {
   vehicle: VehicleInfo;
   tech: string;
   roNumber: string;
-  checks: Record<string, boolean>;
+  checks: { [key: string]: boolean };
   notes: string;
   recommendations: string;
 };
@@ -39,11 +39,11 @@ export type ServiceRecord = {
   status: "open" | "in_progress" | "completed";
 };
 
-export type Record = InspectionRecord | ServiceRecord;
+export type JobRecord = InspectionRecord | ServiceRecord;
 
 const KEY = "eurospec_records";
 
-export function getRecords(): Record[] {
+export function getRecords(): JobRecord[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(KEY);
@@ -53,7 +53,7 @@ export function getRecords(): Record[] {
   }
 }
 
-export function saveRecord(record: Record) {
+export function saveRecord(record: JobRecord) {
   const all = getRecords();
   const idx = all.findIndex((r) => r.id === record.id);
   if (idx >= 0) all[idx] = record;
