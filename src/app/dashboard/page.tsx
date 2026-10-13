@@ -46,6 +46,18 @@ export default function DashboardOverview() {
         ))}
       </div>
 
+      <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+        <h2 className="text-sm font-semibold text-white mb-3">Shop automation</h2>
+        <ul className="grid gap-2 sm:grid-cols-2 text-sm text-[var(--muted)]">
+          <li className="flex gap-2"><span className="text-[var(--accent)]">✓</span> VIN decode auto-fills year, make, model & engine</li>
+          <li className="flex gap-2"><span className="text-[var(--accent)]">✓</span> Auto RO numbers on every new job</li>
+          <li className="flex gap-2"><span className="text-[var(--accent)]">✓</span> Mileage-based service suggestions</li>
+          <li className="flex gap-2"><span className="text-[var(--accent)]">✓</span> Brand logos & one-tap make select</li>
+          <li className="flex gap-2"><span className="text-[var(--accent)]">✓</span> One-click PDF reports for customers</li>
+          <li className="flex gap-2"><span className="text-[var(--accent)]">✓</span> Inspection priority checklist by mileage</li>
+        </ul>
+      </div>
+
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
         <Link
           href="/dashboard/inspection"
