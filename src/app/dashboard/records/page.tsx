@@ -9,6 +9,7 @@ import {
   type ServiceRecord,
 } from "@/lib/storage";
 import { downloadRecordPdf } from "@/lib/pdf";
+import { formatMoney, priceFor } from "@/lib/pricing";
 
 export default function RecordsPage() {
   const [records, setRecords] = useState<JobRecord[]>([]);
@@ -87,6 +88,9 @@ export default function RecordsPage() {
                       {r.type === "inspection" ? "Inspection" : "Service"} · RO:{" "}
                       {r.roNumber || "—"} · Tech: {r.tech || "—"} ·{" "}
                       {new Date(r.createdAt).toLocaleString()}
+                      {r.type === "service" && r.total != null
+                        ? ` · ${formatMoney(r.total)}`
+                        : ""}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -155,10 +159,7 @@ export default function RecordsPage() {
                                     </p>
                                     <ul className="grid gap-0.5 sm:grid-cols-2 list-none">
                                       {items.map((item) => (
-                                        <li
-                                          key={item}
-                                          className="flex items-center gap-2 text-[var(--muted)]"
-                                        >
+                                        <li key={item} className="flex items-center gap-2 text-[var(--muted)]">
                                           <span className="text-emerald-400 text-xs">✓</span>
                                           {item}
                                         </li>
@@ -177,8 +178,7 @@ export default function RecordsPage() {
                         )}
                         {r.recommendations && (
                           <p className="text-[var(--muted)]">
-                            <span className="text-white/70">Recommendations:</span>{" "}
-                            {r.recommendations}
+                            <span className="text-white/70">Recommendations:</span> {r.recommendations}
                           </p>
                         )}
                       </>
@@ -188,20 +188,59 @@ export default function RecordsPage() {
                       <>
                         <div>
                           <p className="text-white/70 mb-1">Services:</p>
-                          <ul className="list-disc list-inside text-[var(--muted)]">
-                            {r.services.map((s) => (
-                              <li key={s}>{s}</li>
+                          <ul className="space-y-1 text-[var(--muted)]">
+                            {(r.lineItems && r.lineItems.length
+                              ? r.lineItems
+                              : r.services.map((s) => ({
+                                  name: s,
+                                  price: priceFor(s),
+                                }))
+                            ).map((item) => (
+                              <li key={item.name} className="flex justify-between gap-4 text-sm">
+                                <span>{item.name}</span>
+                                <span className="tabular-nums text-white/80">
+                                  {item.price > 0 ? formatMoney(item.price) : "Quote"}
+                                </span>
+                              </li>
                             ))}
                           </ul>
                         </div>
-                        {r.laborHours && (
-                          <p className="text-[var(--muted)]">
-                            <span className="text-white/70">Labor:</span> {r.laborHours} hrs
-                          </p>
+                        {(r.subtotal != null || r.laborTotal || r.partsAmount || r.total != null) && (
+                          <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 space-y-1 text-sm">
+                            {r.subtotal != null && (
+                              <div className="flex justify-between text-[var(--muted)]">
+                                <span>Services subtotal</span>
+                                <span className="tabular-nums text-white">{formatMoney(r.subtotal)}</span>
+                              </div>
+                            )}
+                            {!!r.laborTotal && (
+                              <div className="flex justify-between text-[var(--muted)]">
+                                <span>
+                                  Extra labor
+                                  {r.laborHours
+                                    ? ` (${r.laborHours}h${r.laborRate ? ` × ${formatMoney(r.laborRate)}` : ""})`
+                                    : ""}
+                                </span>
+                                <span className="tabular-nums text-white">{formatMoney(r.laborTotal)}</span>
+                              </div>
+                            )}
+                            {!!r.partsAmount && (
+                              <div className="flex justify-between text-[var(--muted)]">
+                                <span>Extra parts</span>
+                                <span className="tabular-nums text-white">{formatMoney(r.partsAmount)}</span>
+                              </div>
+                            )}
+                            {r.total != null && (
+                              <div className="flex justify-between font-semibold text-white border-t border-[var(--border)] pt-1 mt-1">
+                                <span>Total</span>
+                                <span className="tabular-nums text-emerald-400">{formatMoney(r.total)}</span>
+                              </div>
+                            )}
+                          </div>
                         )}
                         {r.partsNotes && (
                           <p className="text-[var(--muted)]">
-                            <span className="text-white/70">Parts:</span> {r.partsNotes}
+                            <span className="text-white/70">Parts notes:</span> {r.partsNotes}
                           </p>
                         )}
                         {r.notes && (
