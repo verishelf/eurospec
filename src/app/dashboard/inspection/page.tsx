@@ -9,6 +9,7 @@ import {
   type InspectionRecord,
   type VehicleInfo,
 } from "@/lib/storage";
+import { generateRoNumber, suggestInspectionFocus } from "@/lib/automation";
 
 const SECTIONS: { title: string; items: string[] }[] = [
   {
@@ -119,7 +120,7 @@ export default function InspectionPage() {
   const router = useRouter();
   const [vehicle, setVehicle] = useState<VehicleInfo>(emptyVehicle());
   const [tech, setTech] = useState("");
-  const [roNumber, setRoNumber] = useState("");
+  const [roNumber, setRoNumber] = useState(() => generateRoNumber());
   const [checks, setChecks] = useState<{ [key: string]: boolean }>({});
   const [notes, setNotes] = useState("");
   const [recommendations, setRecommendations] = useState("");
@@ -158,12 +159,7 @@ export default function InspectionPage() {
             {checkedCount} of {totalItems} items checked
           </p>
         </div>
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className="rounded-md bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--accent-hover)] disabled:opacity-50"
-        >
+        <button type="button" onClick={handleSave} disabled={saving} className="rounded-md bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--accent-hover)] disabled:opacity-50">
           {saving ? "Saving…" : "Save Inspection"}
         </button>
       </div>
@@ -182,6 +178,24 @@ export default function InspectionPage() {
       <div className="mb-6">
         <VehicleForm value={vehicle} onChange={setVehicle} />
       </div>
+
+      {suggestInspectionFocus(vehicle.mileage).length > 0 && (
+        <div className="mb-6 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 p-4">
+          <h3 className="text-sm font-semibold text-white mb-2">
+            Priority checks at {vehicle.mileage || "—"} mi
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {suggestInspectionFocus(vehicle.mileage).map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-[var(--border)] bg-[var(--background)] px-3 py-1 text-xs text-[var(--muted)]"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         {SECTIONS.map((section) => (
