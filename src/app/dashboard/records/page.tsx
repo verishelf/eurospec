@@ -8,6 +8,7 @@ import {
   type JobRecord,
   type ServiceRecord,
 } from "@/lib/storage";
+import { downloadRecordPdf } from "@/lib/pdf";
 
 export default function RecordsPage() {
   const [records, setRecords] = useState<JobRecord[]>([]);
@@ -227,8 +228,19 @@ export default function RecordsPage() {
                       </>
                     )}
 
-                    <div className="pt-2">
-                      <button type="button" onClick={() => handleDelete(r.id)} className="text-xs text-red-400 hover:text-red-300">
+                    <div className="pt-2 flex flex-wrap items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => downloadRecordPdf(r)}
+                        className="rounded-md bg-[var(--accent)] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[var(--accent-hover)]"
+                      >
+                        Download PDF
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(r.id)}
+                        className="text-xs text-red-400 hover:text-red-300"
+                      >
                         Delete record
                       </button>
                     </div>
