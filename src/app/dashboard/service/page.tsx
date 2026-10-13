@@ -9,6 +9,7 @@ import {
   type ServiceRecord,
   type VehicleInfo,
 } from "@/lib/storage";
+import { generateRoNumber, suggestServices } from "@/lib/automation";
 
 const SERVICE_OPTIONS = [
   "Oil & Filter Change",
@@ -40,7 +41,7 @@ export default function ServiceOrderPage() {
   const router = useRouter();
   const [vehicle, setVehicle] = useState<VehicleInfo>(emptyVehicle());
   const [tech, setTech] = useState("");
-  const [roNumber, setRoNumber] = useState("");
+  const [roNumber, setRoNumber] = useState(() => generateRoNumber());
   const [selected, setSelected] = useState<string[]>([]);
   const [laborHours, setLaborHours] = useState("");
   const [partsNotes, setPartsNotes] = useState("");
@@ -110,6 +111,46 @@ export default function ServiceOrderPage() {
       <div className="mb-6">
         <VehicleForm value={vehicle} onChange={setVehicle} />
       </div>
+
+      {suggestServices(vehicle.mileage, vehicle.make).length > 0 && (
+        <div className="mb-6 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <h3 className="text-sm font-semibold text-white">
+              Smart suggestions for {vehicle.mileage || "—"} mi
+            </h3>
+            <button
+              type="button"
+              onClick={() => {
+                const s = suggestServices(vehicle.mileage, vehicle.make);
+                setSelected((prev) => [...new Set([...prev, ...s])]);
+              }}
+              className="text-xs font-semibold text-[var(--accent)] hover:underline"
+            >
+              Apply all
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {suggestServices(vehicle.mileage, vehicle.make).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() =>
+                  setSelected((prev) =>
+                    prev.includes(s) ? prev : [...prev, s]
+                  )
+                }
+                className={`rounded-full border px-3 py-1 text-xs transition ${
+                  selected.includes(s)
+                    ? "border-[var(--accent)] bg-[var(--accent)]/20 text-white"
+                    : "border-[var(--border)] text-[var(--muted)] hover:text-white"
+                }`}
+              >
+                + {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden mb-6">
         <div className="border-b border-[var(--border)] bg-[var(--background)] px-4 py-2.5">
