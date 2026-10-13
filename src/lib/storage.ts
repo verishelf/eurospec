@@ -25,6 +25,11 @@ export type InspectionRecord = {
   recommendations: string;
 };
 
+export type ServiceLineItem = {
+  name: string;
+  price: number;
+};
+
 export type ServiceRecord = {
   id: string;
   type: "service";
@@ -33,10 +38,16 @@ export type ServiceRecord = {
   tech: string;
   roNumber: string;
   services: string[];
+  lineItems?: ServiceLineItem[];
+  subtotal?: number;
   laborHours: string;
+  laborRate?: number;
+  laborTotal?: number;
   partsNotes: string;
+  partsAmount?: number;
   notes: string;
   status: "open" | "in_progress" | "completed";
+  total?: number;
 };
 
 export type JobRecord = InspectionRecord | ServiceRecord;
