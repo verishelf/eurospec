@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandStrip } from "@/components/BrandStrip";
 
 const services = [
   {
@@ -39,8 +40,6 @@ const services = [
   },
 ];
 
-const brands = ["Audi", "BMW", "Mercedes-Benz", "Volkswagen", "Porsche", "MINI", "Volvo", "Land Rover"];
-
 export default function Home() {
   return (
     <>
@@ -80,20 +79,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-b border-[var(--border)] bg-[var(--card)] py-8">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-[var(--muted)]">
-            Specializing in
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-            {brands.map((b) => (
-              <span key={b} className="text-sm font-medium text-white/80">
-                {b}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      <BrandStrip />
 
       <section id="services" className="py-20 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
