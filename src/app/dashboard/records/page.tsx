@@ -5,12 +5,12 @@ import {
   getRecords,
   deleteRecord,
   saveRecord,
-  type Record,
+  type JobRecord,
   type ServiceRecord,
 } from "@/lib/storage";
 
 export default function RecordsPage() {
-  const [records, setRecords] = useState<Record[]>([]);
+  const [records, setRecords] = useState<JobRecord[]>([]);
   const [filter, setFilter] = useState<"all" | "inspection" | "service">("all");
   const [expanded, setExpanded] = useState<string | null>(null);
 

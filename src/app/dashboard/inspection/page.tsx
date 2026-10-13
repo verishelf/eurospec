@@ -120,7 +120,7 @@ export default function InspectionPage() {
   const [vehicle, setVehicle] = useState<VehicleInfo>(emptyVehicle());
   const [tech, setTech] = useState("");
   const [roNumber, setRoNumber] = useState("");
-  const [checks, setChecks] = useState<Record<string, boolean>>({});
+  const [checks, setChecks] = useState<{ [key: string]: boolean }>({});
   const [notes, setNotes] = useState("");
   const [recommendations, setRecommendations] = useState("");
   const [saving, setSaving] = useState(false);
