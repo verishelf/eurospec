@@ -122,10 +122,53 @@ export default function RecordsPage() {
 
                     {r.type === "inspection" && (
                       <>
-                        <p className="text-[var(--muted)]">
-                          <span className="text-white/70">Checked items:</span>{" "}
-                          {Object.values(r.checks).filter(Boolean).length}
-                        </p>
+                        {(() => {
+                          const checked = Object.entries(r.checks)
+                            .filter(([, v]) => v)
+                            .map(([k]) => k);
+                          if (checked.length === 0) {
+                            return (
+                              <p className="text-[var(--muted)]">
+                                <span className="text-white/70">Checked items:</span> none
+                              </p>
+                            );
+                          }
+                          const groups: { [section: string]: string[] } = {};
+                          for (const key of checked) {
+                            const idx = key.indexOf(":");
+                            const section = idx >= 0 ? key.slice(0, idx) : "Other";
+                            const item = idx >= 0 ? key.slice(idx + 1) : key;
+                            if (!groups[section]) groups[section] = [];
+                            groups[section].push(item);
+                          }
+                          return (
+                            <div>
+                              <p className="text-white/70 mb-2">
+                                Checked items ({checked.length})
+                              </p>
+                              <div className="space-y-3">
+                                {Object.entries(groups).map(([section, items]) => (
+                                  <div key={section}>
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)] mb-1">
+                                      {section}
+                                    </p>
+                                    <ul className="grid gap-0.5 sm:grid-cols-2 list-none">
+                                      {items.map((item) => (
+                                        <li
+                                          key={item}
+                                          className="flex items-center gap-2 text-[var(--muted)]"
+                                        >
+                                          <span className="text-emerald-400 text-xs">✓</span>
+                                          {item}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })()}
                         {r.notes && (
                           <p className="text-[var(--muted)]">
                             <span className="text-white/70">Notes:</span> {r.notes}
@@ -133,7 +176,8 @@ export default function RecordsPage() {
                         )}
                         {r.recommendations && (
                           <p className="text-[var(--muted)]">
-                            <span className="text-white/70">Recommendations:</span> {r.recommendations}
+                            <span className="text-white/70">Recommendations:</span>{" "}
+                            {r.recommendations}
                           </p>
                         )}
                       </>
